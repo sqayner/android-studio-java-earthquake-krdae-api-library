@@ -1,0 +1,3 @@
+rootProject.name = "android-studio-java-krdae-api-library"
+include ':app'
+include ':library'
