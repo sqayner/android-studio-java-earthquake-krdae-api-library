@@ -1,4 +1,4 @@
-# android-studio-java-krdae-api-library
+# Java KRDAE Earthquake API
 
 [![](https://jitpack.io/v/sqayner/android-studio-java-earthquake-krdae-api-library.svg)](https://jitpack.io/#sqayner/android-studio-java-earthquake-krdae-api-library)
 
@@ -15,6 +15,7 @@ dependencies {
 }
 ```
 
+## Sample Code
 ```java
 new KRDAE(this, new KRDAE.OnEarthquakeLoadListener() {
             @Override
