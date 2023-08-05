@@ -22,15 +22,19 @@ import java.util.TimeZone;
 
 public class KRDAE {
 
-    private OnEarthquakeLoadListener onEarthquakeLoadListener;
+    private EarthquakeListener earthquakeListener;
     private Context context;
 
-    public KRDAE(Context context, OnEarthquakeLoadListener onEarthquakeLoadListener) {
+    public KRDAE(Context context) {
         this.context = context;
-        this.onEarthquakeLoadListener = onEarthquakeLoadListener;
     }
 
-    public void load() {
+    public KRDAE setEarthquakeListener(EarthquakeListener earthquakeListener) {
+        this.earthquakeListener = earthquakeListener;
+        return this;
+    }
+
+    public KRDAE load() {
         RequestQueue queue = Volley.newRequestQueue(context);
         String url = "http://www.koeri.boun.edu.tr/scripts/lst" + getRandomNumber(0, 10, 3) + ".asp";
 
@@ -52,34 +56,37 @@ public class KRDAE {
                                     getRevised(earthquakeString)
                             ));
                         }
-                        onEarthquakeLoadListener.onLoad(earthquakes);
+                        if (earthquakeListener != null)
+                            earthquakeListener.onLoaded(earthquakes);
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                System.out.println(error);
+                if (earthquakeListener != null)
+                    earthquakeListener.onError(error);
             }
         });
 
         queue.add(stringRequest);
+
+        return this;
     }
 
     private RevisedModel getRevised(String data) {
         String revised = data.substring(121).trim();
 
-        if (revised.equals("İlksel")) {
+        if (revised.equals("İlksel"))
             return null;
-        } else {
-            Calendar date = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-            date.set(Calendar.YEAR, Integer.parseInt(data.substring(0, 4)));
-            date.set(Calendar.MONTH, Integer.parseInt(data.substring(5, 7)) - 1);
-            date.set(Calendar.DAY_OF_MONTH, Integer.parseInt(data.substring(8, 10)));
-            date.set(Calendar.HOUR_OF_DAY, Integer.parseInt(data.substring(11, 13)));
-            date.set(Calendar.MINUTE, Integer.parseInt(data.substring(14, 16)));
-            date.set(Calendar.SECOND, Integer.parseInt(data.substring(17, 19)));
-            date.add(Calendar.HOUR, -3);
-            return new RevisedModel(Integer.parseInt(revised.substring(7, 8)), date.getTime());
-        }
+
+        Calendar date = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        date.set(Calendar.YEAR, Integer.parseInt(data.substring(0, 4)));
+        date.set(Calendar.MONTH, Integer.parseInt(data.substring(5, 7)) - 1);
+        date.set(Calendar.DAY_OF_MONTH, Integer.parseInt(data.substring(8, 10)));
+        date.set(Calendar.HOUR_OF_DAY, Integer.parseInt(data.substring(11, 13)));
+        date.set(Calendar.MINUTE, Integer.parseInt(data.substring(14, 16)));
+        date.set(Calendar.SECOND, Integer.parseInt(data.substring(17, 19)));
+        date.add(Calendar.HOUR, -3);
+        return new RevisedModel(Integer.parseInt(revised.substring(7, 8)), date.getTime());
     }
 
     private Date getDateTime(String data) {
@@ -98,19 +105,13 @@ public class KRDAE {
         String MD = data.substring(55, 58);
         String ML = data.substring(60, 63);
         String MW = data.substring(65, 68);
-        if (MW.equals("-.-")) {
-            if (ML.equals("-.-")) {
-                if (MD.equals("-.-")) {
-                    return 0.0;
-                } else {
-                    return Double.parseDouble(MD);
-                }
-            } else {
-                return Double.parseDouble(ML);
-            }
-        } else {
+        if (!MW.equals("-.-"))
             return Double.parseDouble(MW);
-        }
+        if (!ML.equals("-.-"))
+            return Double.parseDouble(ML);
+        if (!MD.equals("-.-"))
+            return Double.parseDouble(MD);
+        return null;
     }
 
     private int arrayFirstIndexOf(List<String> array, String index) {
@@ -138,8 +139,9 @@ public class KRDAE {
         return randomNumber;
     }
 
-    public interface OnEarthquakeLoadListener {
-        void onLoad(List<KrdaeEarthquakeModel> earthquakes);
-    }
+    public interface EarthquakeListener {
+        void onLoaded(ArrayList<KrdaeEarthquakeModel> earthquakes);
 
+        void onError(Exception e);
+    }
 }

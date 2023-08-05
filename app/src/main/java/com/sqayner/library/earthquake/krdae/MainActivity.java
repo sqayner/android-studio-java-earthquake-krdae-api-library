@@ -1,13 +1,13 @@
 package com.sqayner.library.earthquake.krdae;
 
 import android.os.Bundle;
-import android.view.View;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.sqayner.library.earthquake.krdae.model.KrdaeEarthquakeModel;
 
-import java.util.List;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -18,9 +18,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        krdae = new KRDAE(this, new KRDAE.OnEarthquakeLoadListener() {
+        krdae = new KRDAE(this);
+        krdae.setEarthquakeListener(new KRDAE.EarthquakeListener() {
             @Override
-            public void onLoad(List<KrdaeEarthquakeModel> earthquakes) {
+            public void onLoaded(ArrayList<KrdaeEarthquakeModel> earthquakes) {
                 for (KrdaeEarthquakeModel earthquake : earthquakes) {
                    /*SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ssZ");
                     df.setTimeZone(TimeZone.getDefault());
@@ -29,11 +30,13 @@ public class MainActivity extends AppCompatActivity {
                     System.out.println(earthquake.toString());
                 }
             }
+
+            @Override
+            public void onError(Exception e) {
+                if (e != null)
+                    Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         });
         krdae.load();
-    }
-
-    public void test(View view) {
-
     }
 }
