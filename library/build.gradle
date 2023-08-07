@@ -1,9 +1,7 @@
 plugins {
     id 'com.android.library'
+    id 'maven-publish'
 }
-
-group = 'com.github.sqayner'
-version = '2.0'
 
 android {
     namespace 'com.sqayner.library.earthquake.krdae'
@@ -11,8 +9,8 @@ android {
 
     defaultConfig {
         minSdk 26
-        versionCode 2
-        versionName "2.0"
+        versionCode 3
+        versionName "2.0.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -28,6 +26,12 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
 }
 
 dependencies {
@@ -40,4 +44,18 @@ dependencies {
 
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+}
+
+publishing {
+    publications {
+        release(MavenPublication) {
+            groupId = 'com.github.sqayner'
+            artifactId = 'android-studio-java-earthquake-krdae-api-library'
+            version = '2.0.1'
+
+            afterEvaluate {
+                from components.release
+            }
+        }
+    }
 }
